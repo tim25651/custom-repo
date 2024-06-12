@@ -1,9 +1,8 @@
-portfolio
 SANDBOX
-DOWNLOAD_GH portfolio-performance/portfolio *x86*.tar.gz
 SET INSTALL_DIR /opt/$NAME
 SET DESKTOP $NAME.desktop
 SET ICON $NAME.png
+DOWNLOAD_GH portfolio-performance/portfolio *x86*.tar.gz
 EXTRACT
 RENAME $DEST/data
 # Name and Version are automatically included
@@ -13,4 +12,3 @@ CREATE_DEB "openjdk-21-jre | openjdk-19-jre | openjdk-18-jre | openjdk-17-jre"
 COPY_FIX $PKG/install $DEST/debian/install
 COPY_FIX $PKG/links $DEST/debian/links
 BUILD_DEB
-EXIT

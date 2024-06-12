@@ -1,4 +1,0 @@
-isp
-DOWNLOAD https://public.dhe.ibm.com/storage/tivoli-storage-management/maintenance/client/v8r1/Linux/LinuxX86_DEB/BA/v8121/8.1.21.0-TIV-TSMBAC-LinuxX86_DEB.tar
-EXTRACT *.deb
-EXIT

@@ -1,0 +1,31 @@
+package:
+  name: chocolatey
+  version: $VERSION
+
+source:
+  git_rev: $VERSION
+  git_url: https://github.com/chocolatey/choco.git
+
+requirements:
+  host:
+    - python
+  build:
+    - python
+    - setuptools
+    - pip
+    - mono
+    - dotnet-sdk>=6.0
+  run:
+    - python
+    - mono
+    - dotnet-sdk>=6.0
+
+# test:
+#   source_files:
+#     - install/test
+#   commands:
+#     - cd install
+#     - make test -j $(nproc)
+
+about:
+  summary: A linux-build for chocolatey

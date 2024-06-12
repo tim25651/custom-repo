@@ -106,7 +106,7 @@ def final_exists(params: Params) -> bool:
     elif mgr == PackageManager.APT:
         files = list((params["REPO"] / "pkgs" / "apt").iterdir())
         return any(f.name.startswith(params["STEM"]) for f in files)
-    
+
     else:
         raise CommandExecutionError(f"Unknown package manager: {mgr}")
 

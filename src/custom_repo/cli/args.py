@@ -29,7 +29,6 @@ def parse_restart_args() -> RestartArgs:
         "repo",
         type=Path,
         help="The repository folder.",
-        required=True,
     )
     parser.add_argument(
         "-v", "--verbose", action="count", help="Verbosity level", default=0

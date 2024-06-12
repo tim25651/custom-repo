@@ -130,7 +130,7 @@ def build_deb(params: Params, wd: Path) -> None:
 
     target_dir = params["REPO"] / "pkgs" / "apt"
 
-    file = file_manup.get_first_elem(dest_dir, "*.deb")
+    file = file_manup.get_first_elem(dest_dir.parent, "*.deb")
 
     filename = f"{params['STEM']}.deb"
     file_manup.copy(file, target_dir / filename)

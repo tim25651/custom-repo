@@ -12,7 +12,7 @@ from subprocess import CalledProcessError
 
 from conda_index import api as index_api
 
-from custom_repo.modules import exec_cmd, set_log_level
+from custom_repo.modules import ConnectionKeeper, exec_cmd, file_manup, set_log_level
 from custom_repo.parser import Params, fix_vars
 
 conda_logger = logging.getLogger(__name__)
@@ -55,16 +55,9 @@ def _move_pkg(name: str, stem: str, version: str, target_dir: Path) -> None:
     if not conda_prefix:  # pylint: disable=consider-using-assignment-expr
         raise ValueError("CONDA_PREFIX is not set.")
 
-    pkg_glob = (Path(conda_prefix) / "conda-bld" / "linux-64").glob(
-        f"{name}-{version}-*.tar.bz2"
-    )
+    build_dir = Path(conda_prefix) / "conda-bld" / "linux-64"
 
-    pkgs = list(pkg_glob)
-
-    if len(pkgs) != 1:
-        raise ValueError(f"Found either no or multiple packages: {pkgs}")
-
-    pkg = pkgs.pop()
+    pkg = file_manup.get_first_elem(build_dir, f"{name}-{version}-*.tar.bz2")
 
     pkg.rename(target_dir / (stem + ".tar.bz2"))
 
@@ -85,24 +78,22 @@ def _log_debug(out: str, err: str, wd: Path) -> None:
     conda_logger.error("Error log: %s", err)
 
 
-def _build(recipe: Path, domain: str) -> tuple[str, str, int]:
+def _build(recipe: Path, domain: str | None) -> tuple[str, str, int]:
     """Build a conda package."""
     out_io = StringIO()
     err_io = StringIO()
     code = 0
 
     prev_level = conda_logger.getEffectiveLevel()
+
+    args = ["conda-build", "./recipe", "-c", "conda-forge"]
+    if domain:
+        args.extend(["-c", f"{domain}/conda"])
+
     with redirect_stdout(out_io), redirect_stderr(err_io):
         try:
             exec_cmd(
-                [
-                    "conda-build",
-                    "./recipe",
-                    "-c",
-                    "conda-forge",
-                    "-c",
-                    f"{domain}/conda",
-                ],
+                args,
                 cwd=recipe.parent,
             )
 
@@ -122,7 +113,7 @@ def _build(recipe: Path, domain: str) -> tuple[str, str, int]:
     return out, err, code
 
 
-def build_conda_pkg(params: Params, wd: Path) -> None:
+def build_conda_pkg(keeper: ConnectionKeeper, params: Params, wd: Path) -> None:
     """Build a conda package."""
     repo = params["REPO"]
     domain = params["DOMAIN"]
@@ -138,7 +129,19 @@ def build_conda_pkg(params: Params, wd: Path) -> None:
 
     recipe = wd / "recipe"
 
-    out, err, code = _build(recipe, domain)
+    # test if %domain%/conda is reachable
+    reponse = keeper.session.get(f"{domain}/conda")
+    if reponse.status_code == 200:
+        checked_domain = domain
+    else:
+        conda_logger.error(
+            "Error: %s/conda is not reachable (%s). Only conda-forge will be used.",
+            domain,
+            reponse.status_code,
+        )
+        checked_domain = None
+
+    out, err, code = _build(recipe, checked_domain)
 
     if code != 0:
         _log_debug(out, err, wd)

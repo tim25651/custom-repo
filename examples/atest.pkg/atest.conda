@@ -1,5 +1,0 @@
-atest
-VERSION 0.0.1
-COPY $PKG/$NAME.$VERSION_source.tar.gz source.tar.gz
-CONDA
-EXIT

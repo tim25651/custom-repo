@@ -132,8 +132,10 @@ def _check_repo_struct(repo: Path) -> None:
 
 def _init_repo(repo: Path) -> None:
     """Initialize a new repository."""
+    assert not any(repo.iterdir()), "Folder must be empty."
+
     for d in MUST_HAVE_DIRS:
-        (repo / d).mkdir(parents=True)
+        (repo / d).mkdir(parents=True, exist_ok=True)
 
     cli_logger.warning("Folder structure created.")
     cli_logger.warning("Please add config files to %s", repo / "configs")

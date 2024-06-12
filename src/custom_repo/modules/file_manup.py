@@ -43,9 +43,14 @@ def _get_compression_mode(src: Path) -> str:
     if ".tar" not in exts:
         raise DecompressionError(f"Not a tarball: {src}")
 
-    if ".gz" in exts or ".tgz" in exts:
+    final = exts[-1]
+    if final == ".tar":
+        return "r"
+
+    if final in {".gz", ".tgz"}:
         return "r:gz"
-    if ".bz2" in exts or ".tbz2" in exts:
+
+    if final in {".bz2", ".tbz2"}:
         return "r:bz2"
 
     raise DecompressionError(f"Unknown compression mode for {src}")

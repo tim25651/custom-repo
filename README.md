@@ -32,6 +32,8 @@ cp -r code_drop/temp/_PublishedLibs/chocolatey $CHOCO_DIR/lib
 
 # install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install node
 
 # install this package
 git clone https://github.com/tim25651/custom-repo.git
@@ -55,7 +57,7 @@ mkdir -p ~/custom-repo
 # the domain where the repository is hosted,
 # the github token (or set GH_TOKEN in the environment),
 # the user (default: repo)
-# the password for the repository (or set REPO_PASS in the environment)
+# the password for the repository (or set REPO_PASSWD in the environment)
 # and if to include the restart command (else the server has to be restarted manually, see 5.)
 custom-repo build ~/custom-repo \
     -k /path/to/key.gpg \
@@ -78,7 +80,7 @@ custom-repo restart ~/custom-repo
 1. Set the repository user and password
 ```sh
 export $REPO_USER=...
-export $REPO_PASS=...
+export $REPO_PASSWD=...
 # set the repo HTTP password
 sudo apt install apache2-utils nginx -y
 sudo mkdir -p /var/www/secure/%server_name%
@@ -142,8 +144,8 @@ sudo systemctl restart nginx
 - Create a `.netrc` file in the home directory
 ```sh
 export $REPO_USER=...
-export $REPO_PASS=...
-echo "machine %domain% login $REPO_USER password $REPO_PASS" >> ~/.netrc
+export $REPO_PASSWD=...
+echo "machine %domain% login $REPO_USER password $REPO_PASSWD" >> ~/.netrc
 chmod 600 ~/.netrc
 ```
 
@@ -163,15 +165,15 @@ curl -n --output - %domain%/pub.gpg | sudo tee /usr/share/keyrings/%arbitrarynam
 # add the source
 echo "deb [signed-by=/usr/share/keyrings/%arbitraryname%.gpg] %domain%/debs/ stable main" | sudo tee /etc/apt/sources.list.d/%arbitraryname%.list > /dev/null
 # add the credentials
-echo "machine %server_name% login $REPO_USER password $REPO_PASS" | sudo tee /etc/apt/auth.conf.d/%arbitraryname%.conf > /dev/null
+echo "machine %server_name% login $REPO_USER password $REPO_PASSWD" | sudo tee /etc/apt/auth.conf.d/%arbitraryname%.conf > /dev/null
 sudo chmod 600 /etc/apt/auth.conf.d/%arbitraryname%.conf
 sudo apt update
 ```
 3. Chocolatey
 ```powershell
 export $REPO_USER=...
-export $REPO_PASS=...
-choco source add -n=%arbitraryname% -s="https://%domain%/choco/" -u=$REPO_USER -p=$REPO_PASS
+export $REPO_PASSWD=...
+choco source add -n=%arbitraryname% -s="https://%domain%/choco/" -u=$REPO_USER -p=$REPO_PASSWD
 ```
 4. Conda
 ```sh

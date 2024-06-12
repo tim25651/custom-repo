@@ -55,7 +55,7 @@ IMPLEMENTATIONS: dict[
     Command.CREATE_DEB: lambda *args: create_deb(*args[1:]),
     Command.BUILD_DEB: lambda *args: build_deb(args[1], args[3]),
     Command.DH_DISABLE: lambda *args: dh_disable(*args[1:]),
-    Command.CONDA_BUILD: lambda *args: build_conda_pkg(args[1], args[3]),
+    Command.CONDA_BUILD: lambda *args: build_conda_pkg(args[0], args[1], args[3]),
     Command.CHOCO: lambda *args: build_choco_pkg(args[1], args[3]),
 }
 

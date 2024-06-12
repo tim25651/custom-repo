@@ -1,0 +1,2 @@
+VERSION re:wps-office_([0-9\.A-Z]+)_amd64.deb
+DOWNLOAD_BROWSER "https://www.wps.com/office/linux/>Deb Package"

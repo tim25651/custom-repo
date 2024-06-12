@@ -1,0 +1,6 @@
+# Current Version
+# https://public.dhe.ibm.com/storage/tivoli-storage-management/maintenance/client/v8r1/Linux/LinuxX86_DEB/BA/
+VERSION 8.1.22.0
+# change url if version changes
+DOWNLOAD https://public.dhe.ibm.com/storage/tivoli-storage-management/maintenance/client/v8r1/Linux/LinuxX86_DEB/BA/v8122/$VERSION-TIV-TSMBAC-LinuxX86_DEB.tar
+EXTRACT *.deb

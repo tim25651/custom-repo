@@ -25,6 +25,7 @@ include = ["custom_repo*"]
 
 [project.scripts]
 custom-repo = "custom_repo.main:main"
+custom-repo-restart = "custom_repo.main:restart"
 
 [tool.isort]
 profile = "black"
