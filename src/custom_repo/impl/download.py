@@ -1,6 +1,10 @@
-"""Get files to the target directory.
+"""Implementation of the download commands.
 
-Main entry point is `download_cmd`"""
+Implements:
+- `from_github`: Download a release from a GitHub repo.
+- `from_src`: Copy or symlink a file from the source directory.
+- `from_file`: Download a file from a URL.
+"""
 
 import logging
 from pathlib import Path
@@ -8,14 +12,14 @@ from typing import Literal
 
 from custom_repo.modules import ConnectionKeeper, TemporaryDirectory
 from custom_repo.modules import download as dl
-from custom_repo.modules import file_manup
+from custom_repo.modules import file_manup, filter_exts
 from custom_repo.parser import (
     Command,
     PackageManager,
     Params,
     TargetDir,
+    cmd_groups,
     fix_vars,
-    from_file,
 )
 
 dl_logger = logging.getLogger(__name__)
@@ -150,3 +154,64 @@ def copy_from_src(
     dl_logger.info("Copied %s to %s.", full_src, target_file)
 
     return True
+
+
+def from_file(  # pylint: disable=too-complex
+    keeper: ConnectionKeeper,
+    params: Params,
+    cmd: Literal[
+        Command.DOWNLOAD, Command.DOWNLOAD_BROWSER, Command.DOWNLOAD_REMOTE_NAME
+    ],
+    args: list[str],
+    wd: Path,
+) -> None:
+    """Download a file from a URL.
+    If DOWNLOAD_BROWSER is used, open the URL in the browser.
+
+    Usage:
+    >>> DOWNLOAD URL
+    >>> DOWNLOAD_REMOTE_NAME URL
+    >>> DOWNLOAD_BROWSER URL
+    """
+    url = args[0]
+    url = fix_vars(params, url)
+
+    if not params["SUFFIXES"]:
+        if cmd == Command.DOWNLOAD_REMOTE_NAME:
+            raise ValueError("No suffixes given for remote name download.")
+
+        if cmd == Command.DOWNLOAD:
+            params["SUFFIXES"] = filter_exts(Path(url))
+        elif cmd == Command.DOWNLOAD_BROWSER:
+            pass
+        else:
+            raise ValueError(f"Unknown command: {cmd}")
+
+    if cmd_groups.download_direct(cmd):
+        filename = params["STEM"] + "".join(params["SUFFIXES"])
+        params["FILE"] = dl.download_direct(url, wd, filename, session=keeper.session)
+
+    # open the URL in the browser and download the file
+    elif cmd == Command.DOWNLOAD_BROWSER:
+        if params["DIR"] in {
+            TargetDir.TAP,
+        }:
+            stem = None
+            prefix = params["STEM"] + "|"
+        else:
+            stem = params["STEM"]
+            prefix = None
+
+        if params["MGR"] == PackageManager.CHOCO:
+            stem = None
+
+        try:
+            params["FILE"] = dl.download_via_browser(
+                keeper.browser, url, wd, stem=stem, prefix=prefix
+            )
+        except dl.file.DownloadError as e:
+            dl_logger.error("Error during download from %s: %s", url, e)
+            params["FILE"] = "FAILED_DOWNLOAD"
+
+    else:
+        raise ValueError(f"Unknown command: {cmd}")

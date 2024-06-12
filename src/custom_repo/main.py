@@ -3,10 +3,9 @@
 import logging
 from pathlib import Path
 
-from custom_repo import cli, mgrs, parser, run
+from custom_repo import cli, impl, mgrs
 from custom_repo.modules import check_installs, download, set_log_level
-from custom_repo.parser import parse, Command
-from custom_repo.impl import IMPLEMENTATIONS
+from custom_repo.parser import parse
 
 set_log_level(logging.WARNING)
 
@@ -45,7 +44,7 @@ def main() -> None:
         "mono",
     })
 
-    run.clean_data(repo)
+    impl.clean_data(repo)
 
     with download.ConnectionKeeper(headless=headless) as keeper:
         configs = parse.load_configs(repo, domain, auth, keeper)
@@ -53,7 +52,7 @@ def main() -> None:
         parse.check_for_duplicates(configs)
 
         for params, cmds in configs:
-            if run.final_exists(params):
+            if impl.final_exists(params):
                 continue
 
             main_logger.debug("Loading %s (%s)", params["NAME"], params["MGR"].name)
@@ -62,12 +61,15 @@ def main() -> None:
                 [actual_cmd.name for actual_cmd, _ in cmds],
             )
 
-            with parser.DirContext(params) as wd:
+            with impl.DirContext(params) as wd:
                 for actual_cmd, cmd_args in cmds:
-                    main_logger.debug("CMD: %s ARGS: %s", actual_cmd, cmd_args if actual_cmd != Command.CASK else [x[:10] for x in cmd_args])
-
-                    func = IMPLEMENTATIONS[actual_cmd]
-                    func(keeper, params, cmd_args, wd)
+                    impl.run_cmd(
+                        keeper,
+                        params,
+                        actual_cmd,
+                        cmd_args,
+                        wd,
+                    )
 
             main_logger.info(
                 "Finished %s (%s): %s",

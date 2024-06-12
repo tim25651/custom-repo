@@ -5,13 +5,8 @@ import re
 import shlex
 from collections import Counter
 from pathlib import Path
+from typing import Literal
 
-from custom_repo.exceptions import (
-    CustomRepoError,
-    ParsingError,
-    StructureError,
-    UnknownCommandError,
-)
 from custom_repo.modules import ConnectionKeeper
 from custom_repo.modules import download as dl
 from custom_repo.modules import filter_exts, has_correct_struct
@@ -19,11 +14,35 @@ from custom_repo.modules.struct import FolderStructureError
 from custom_repo.parser import cmd_groups
 from custom_repo.parser.cmd_groups import DOWNLOAD_CMDS, UNIQUE_CMDS
 from custom_repo.parser.cmds import Command, check_number_of_args
-from custom_repo.parser.dl import get_name
+from custom_repo.parser.exceptions import (
+    CustomRepoError,
+    ParsingError,
+    StructureError,
+    UnknownCommandError,
+)
 from custom_repo.parser.params import PackageManager, Params, TargetDir
 from custom_repo.parser.utils import adjust_regex_version
 
 parse_logger = logging.getLogger(__name__)
+
+
+def get_name(
+    cmd: Literal[Command.DOWNLOAD_REMOTE_NAME, Command.DOWNLOAD_BROWSER],
+    url: str,
+    keeper: ConnectionKeeper,
+) -> str | Literal["FAILED_DOWNLOAD"]:
+    """Get the name of a remote file or download it via the browser."""
+    if cmd == Command.DOWNLOAD_REMOTE_NAME:
+        return dl.get_remote_filename(url)
+
+    if cmd == Command.DOWNLOAD_BROWSER:
+        try:
+            return str(dl.download_via_browser(keeper.browser, url, None))
+        except dl.file.DownloadError as e:
+            parse_logger.error("Error during download from %s: %s", url, e)
+            return "FAILED_DOWNLOAD"
+
+    raise ValueError(f"Unknown command: {cmd}")
 
 
 def read_lines(inputs: list[str]) -> list[tuple[str, list[str]]]:

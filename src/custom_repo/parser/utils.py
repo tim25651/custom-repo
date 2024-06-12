@@ -10,43 +10,8 @@ import re
 from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
-from custom_repo.modules import TemporaryDirectory
-from custom_repo.parser.params import Params, TargetDir
-
-
-class DirContext:
-    """Context manager for the repository directory.
-
-    If params["DIR"] is "tmp", a temporary directory is created.
-    else either the debs or tap-data directory is returned.
-    """
-
-    def __init__(self, params: Params):
-        """Initialize the context manager."""
-        self.repo = params["REPO"]
-        self.dir = params["DIR"]
-        self.tmp: TemporaryDirectory | None = None
-
-    def __enter__(self) -> Path:
-        """Return the repository directory."""
-        if self.dir == TargetDir.TMP:
-            self.tmp = TemporaryDirectory(prefix="tmp_DirContext_", dir=self.repo)
-            return self.tmp.path
-
-        if self.dir == TargetDir.DEBS:
-            return self.repo / "pkgs" / "apt"
-
-        if self.dir == TargetDir.TAP:
-            return self.repo / "public" / "data" / "tap"
-
-        raise ValueError(f"Invalid directory: {self.dir}")
-
-    def __exit__(self, *args: Any) -> None:
-        """Clean up the temporary directory."""
-        if self.tmp:
-            self.tmp.cleanup()
+from custom_repo.parser.params import Params
 
 
 def fix_vars(params: Params, string: str, skip: Iterable[str] | None = None) -> str:

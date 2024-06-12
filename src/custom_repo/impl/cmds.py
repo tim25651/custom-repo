@@ -1,15 +1,31 @@
+"""Implementation of the commands in the custom repository.
+
+Implements:
+- `set_cmd`: Set an environment variable.
+- `rename`: Rename the first directory in `wd`.
+- `extract`: Extract a tarball.
+- `mkdir`: Create a directory in `wd`.
+- `write_caskfile`: Create a Cask file for Homebrew.
+- `copy_cmd`: Copy a file, a folder recursively or files matching a glob pattern.
+- `download_cmd`: Subset of run_cmd for downloading files.
+"""
+
 import logging
 import urllib.parse
 from pathlib import Path
 
 from custom_repo.impl.download import from_file, from_github, from_src
-from custom_repo.impl.exceptions import CommandExecutionError, VariableError
+from custom_repo.impl.utils import CommandExecutionError
 from custom_repo.modules import ConnectionKeeper, TemporaryDirectory, file_manup
 from custom_repo.parser import COPY_CMD, DOWNLOAD_CMD, Command, cmd_groups
 from custom_repo.parser.params import Params, TargetDir
 from custom_repo.parser.utils import fix_vars
 
 impl_logger = logging.getLogger(__name__)
+
+
+class VariableError(CommandExecutionError):
+    """Could not set the variable."""
 
 
 def set_cmd(params: Params, args: list[str]) -> None:
