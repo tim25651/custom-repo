@@ -7,7 +7,6 @@ The first word is the command to be executed and the rest are the arguments.
 
 import logging
 from pathlib import Path
-from typing import Literal, TypeAlias, TypeGuard
 
 from custom_repo.exceptions import CustomRepoError
 from custom_repo.mgrs import (
@@ -266,23 +265,19 @@ def clean_data(repo: Path) -> None:
         ValueError: If a file doesn't has the right prefix.
     """
 
-    _MGR_SUFFIX: TypeAlias = Literal[  # pylint: disable=invalid-name
-        "conda", "choco", "apt", "brew"
-    ]
-
-    def typeguard_mgr(mgr_: str) -> TypeGuard[_MGR_SUFFIX]:
-        """Typeguard for the package managers."""
-        return mgr_ in {"conda", "choco", "apt", "brew"}
-
     def _get_data(
         file: Path,
-    ) -> tuple[str, str, _MGR_SUFFIX]:
+    ) -> tuple[str, str, PackageManager]:
         """Get the data."""
         suffix = "".join(filter_exts(file))
-        name, version, mgr, *_ = file.name.split("|")
-        mgr = mgr.removesuffix(suffix)
-        if not typeguard_mgr(mgr):
-            raise ValueError(f"Unknown manager: {mgr}")
+        name, version, maybe_mgr, *_ = file.name.split("|")
+        maybe_mgr = maybe_mgr.removesuffix(suffix)
+
+        try:
+            mgr = PackageManager(maybe_mgr)
+        except ValueError as e:
+            raise ValueError(f"Invalid prefix: {maybe_mgr}") from e
+
         return name, version, mgr
 
     downloaded_files = list((x, _get_data(x)) for x in repo.glob("public/data/*/*"))
@@ -302,14 +297,18 @@ def final_exists(params: Params) -> bool:
     repo = params["REPO"]
     stem = params["STEM"]
 
+    def _prefix(mgr: PackageManager) -> Path:
+        """Get the prefix for the pkgs folder."""
+        return repo / "pkgs" / mgr.value
+
     if mgr == PackageManager.CONDA:
-        final = repo / "pkgs" / "conda" / f"{stem}.tar.bz2"
+        final = _prefix(mgr) / f"{stem}.tar.bz2"
     elif mgr == PackageManager.CHOCO:
-        final = repo / "pkgs" / "choco" / f"{stem}.nupkg"
+        final = _prefix(mgr) / f"{stem}.nupkg"
     elif mgr == PackageManager.BREW:
-        final = repo / "pkgs" / "tap" / f"{stem}.rb"
+        final = _prefix(mgr) / f"{stem}.rb"
     elif mgr == PackageManager.APT:
-        files = list((repo / "pkgs" / "apt").iterdir())
+        files = list(_prefix(mgr).iterdir())
         return any(f.name.startswith(stem) for f in files)
     else:
         raise CustomRepoError(f"Unknown package manager: {mgr}")

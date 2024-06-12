@@ -34,6 +34,7 @@ def get_name(
 
     raise ValueError(f"Unknown command: {cmd}")
 
+
 def from_file(  # pylint: disable=too-complex
     keeper: ConnectionKeeper,
     params: Params,
