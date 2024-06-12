@@ -23,6 +23,8 @@ We have a folder structure that contains all built packages (root/pkgs), a publi
 
 While apt, conda and homebrew are served by nginx, for the Chocolatey server, I used the shaka-projects's [express-chocolatey-server](https://github.com/shaka-project/express-chocolatey-server).
 
+After running the tests, the built chocolatey conda package can be installed on the server and the systemwide installed packages (mono, dotnet-sdk and chocolatey itself) can be removed.
+Additionally you could also install the micromamba debian package to replace conda installation in /opt/.
 ## Installation
 
 - Create a personal access token on https://github.com/settings/tokens
