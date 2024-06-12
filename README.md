@@ -1,14 +1,27 @@
-# Custom Ubuntu Repository
+# Custom Repository
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [Usage](#usage)
-3. [Configure](#configure)
+1. [Background](#background)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [Configure](#configure)
     1. [Server](#server)
     2. [Client](#client)
     3. [Package Managers](#package-managers)
-4. [Cleanup](#cleanup)
+5. [Cleanup](#cleanup)
+
+
+## Background
+
+After multiple reinstallations of my VMs and the need to install the same software over and over again, I decided to create a custom repository.
+As my personal PC is a Mac, the workstation servers are Linux, and the VMs are Windows, I wanted to create a repository that can be used on all systems.
+As I also use proprietary software, I wanted to create a repository that can be used with a private password.
+
+The repository is based on the following technologies:
+We have a folder structure that contains all built packages (root/pkgs), a public facing folder (root/public), and a private folder (root/private) to store proprietary software.
+
+While apt, conda and homebrew are served by nginx, for the Chocolatey server, I used the shaka-projects's [express-chocolatey-server](https://github.com/shaka-project/express-chocolatey-server).
 
 ## Installation
 
