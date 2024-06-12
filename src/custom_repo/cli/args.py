@@ -62,7 +62,7 @@ class BuildArgs(argparse.Namespace):
     headless: bool
     user: str
     passwd: Path | None
-    restart_flag: bool
+    restart: bool
 
 
 def parse_build_args() -> BuildArgs:

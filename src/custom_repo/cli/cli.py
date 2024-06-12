@@ -200,4 +200,4 @@ def check_build_args() -> tuple[Path, str, Path, str, bool, bool]:
 
     auth = _check_auth(args)
 
-    return repo, domain, priv_file, auth, args.headless, args.restart_flag
+    return repo, domain, priv_file, auth, args.headless, args.restart

@@ -34,25 +34,6 @@ def get_name(
 
     raise ValueError(f"Unknown command: {cmd}")
 
-
-def wrapped_download_direct(
-    url: str,
-    wd: Path,
-    params: Params,
-    keeper: ConnectionKeeper,
-) -> Path:
-    """Download a file directly from a URL. If the file already exists,
-    return it and a bool whether we actually downloaded it."""
-    name = params["STEM"]
-
-    return dl.download_direct(
-        url,
-        wd,
-        name,
-        session=keeper.session,
-    )
-
-
 def from_file(  # pylint: disable=too-complex
     keeper: ConnectionKeeper,
     params: Params,

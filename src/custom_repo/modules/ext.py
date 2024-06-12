@@ -6,7 +6,6 @@ Implements:
 - `filter_exts`: Filter the file extensions.
 """
 
-from collections.abc import Sequence
 from pathlib import Path
 
 
