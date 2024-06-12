@@ -1,0 +1,14 @@
+mestrenova
+VERSION 14.3.3-33362
+CASK
+cask "$NAME" do
+    version "$VERSION"
+  
+    url "https://mestrelab.com/downloads/mnova/mac/MestReNova-#{version}.dmg"
+    name "MestReNova"
+    desc "A top class software suite to process your analytical chemistry data"
+    homepage "https://mestrelab.com/software/mnova/"
+  
+    app "MestReNova.app"
+  end
+EXIT

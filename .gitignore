@@ -1,0 +1,17 @@
+# Ignore build, cache and temporary files
+build/
+*.egg-info
+tmp*/
+.mypy_cache
+.pytest_cache
+__pycache__
+.DS_Store
+
+# Important! Keys and passwords should not be stored in the repository.
+.htpasswd
+.passwd
+.gh_token
+*.gpg
+
+# Ignore the test repo
+repo/

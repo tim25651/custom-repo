@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=$VERSION
+Type=Application
+Name=PortfolioPerformance
+GenericName=Portfolio Performance
+Comment=Manage your portfolio
+Exec=$INSTALL_DIR/PortfolioPerformance
+Icon=portfolio
+Terminal=false
+Categories=Finance;PersonalFinance;

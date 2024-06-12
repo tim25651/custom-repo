@@ -1,0 +1,3 @@
+data/* $INSTALL_DIR
+$DESKTOP /usr/share/applications/
+icons/$ICON /usr/share/icons/hicolor/scalable/apps/

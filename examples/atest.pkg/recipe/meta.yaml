@@ -1,0 +1,6 @@
+package:
+  name: $NAME
+  version: $VERSION
+
+source:
+  path: $FILE
