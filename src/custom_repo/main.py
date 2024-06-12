@@ -5,7 +5,8 @@ from pathlib import Path
 
 from custom_repo import cli, mgrs, parser, run
 from custom_repo.modules import check_installs, download, set_log_level
-from custom_repo.parser import parse
+from custom_repo.parser import parse, Command
+from custom_repo.impl import IMPLEMENTATIONS
 
 set_log_level(logging.WARNING)
 
@@ -63,13 +64,10 @@ def main() -> None:
 
             with parser.DirContext(params) as wd:
                 for actual_cmd, cmd_args in cmds:
-                    run.run_cmd(
-                        keeper,
-                        params,
-                        actual_cmd,
-                        cmd_args,
-                        wd,
-                    )
+                    main_logger.debug("CMD: %s ARGS: %s", actual_cmd, cmd_args if actual_cmd != Command.CASK else [x[:10] for x in cmd_args])
+
+                    func = IMPLEMENTATIONS[actual_cmd]
+                    func(keeper, params, cmd_args, wd)
 
             main_logger.info(
                 "Finished %s (%s): %s",
