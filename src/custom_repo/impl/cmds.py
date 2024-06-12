@@ -126,7 +126,7 @@ def write_caskfile(
     repo = params["REPO"]
     stem = params["STEM"]
     pub = repo / "public"
-    pkgs = repo / "pkgs" / "tap"
+    pkgs = repo / "pkgs" / "brew"
 
     content = args[0]
 

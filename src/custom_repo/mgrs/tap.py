@@ -20,7 +20,7 @@ def build_tap(repo: Path) -> None:
         ValueError: If an unexpected file is found in the temporary directory.
     """
     pub = repo / "public" / "tap.git"
-    pkgs = repo / "pkgs" / "tap"
+    pkgs = repo / "pkgs" / "brew"
 
     if not pub.exists():
         git.init(pub, bare=True)

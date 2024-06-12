@@ -45,7 +45,7 @@ class DirContext:
             return self.repo / "pkgs" / "apt"
 
         if self.dir == TargetDir.TAP:
-            return self.repo / "public" / "data" / "tap"
+            return self.repo / "public" / "data" / "brew"
 
         raise ValueError(f"Invalid directory: {self.dir}")
 
@@ -94,22 +94,19 @@ def final_exists(params: Params) -> bool:
     """Check if the final file already exists in the repository."""
 
     mgr = params["MGR"]
-    repo = params["REPO"]
-    stem = params["STEM"]
+    exts = {
+        PackageManager.CONDA: ".tar.bz2",
+        PackageManager.CHOCO: ".nupkg",
+        PackageManager.BREW: ".rb",
+    }
 
-    def _prefix(mgr: PackageManager) -> Path:
-        """Get the prefix for the pkgs folder."""
-        return repo / "pkgs" / mgr.value
+    if ext := exts.get(mgr):
+        final = params["REPO"] / "pkgs" / mgr.value / (params["STEM"] + ext)
 
-    if mgr == PackageManager.CONDA:
-        final = _prefix(mgr) / f"{stem}.tar.bz2"
-    elif mgr == PackageManager.CHOCO:
-        final = _prefix(mgr) / f"{stem}.nupkg"
-    elif mgr == PackageManager.BREW:
-        final = _prefix(mgr) / f"{stem}.rb"
     elif mgr == PackageManager.APT:
-        files = list(_prefix(mgr).iterdir())
-        return any(f.name.startswith(stem) for f in files)
+        files = list((params["REPO"] / "pkgs" / "apt").iterdir())
+        return any(f.name.startswith(params["STEM"]) for f in files)
+    
     else:
         raise CommandExecutionError(f"Unknown package manager: {mgr}")
 

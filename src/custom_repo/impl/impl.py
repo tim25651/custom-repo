@@ -42,6 +42,8 @@ IMPLEMENTATIONS: dict[
     Command.COPY_FIX: lambda *args: copy_cmd(Command.COPY_FIX, *args[1:]),
     Command.COPY_DIR: lambda *args: copy_cmd(Command.COPY_DIR, *args[1:]),
     Command.COPY_GLOB: lambda *args: copy_cmd(Command.COPY_GLOB, *args[1:]),
+    Command.COPY_SRC: lambda *args: download_cmd(Command.COPY_SRC, *args),
+    Command.SYMLINK_SRC: lambda *args: download_cmd(Command.SYMLINK_SRC, *args),
     Command.DOWNLOAD: lambda *args: download_cmd(Command.DOWNLOAD, *args),
     Command.DOWNLOAD_GH: lambda *args: download_cmd(Command.DOWNLOAD_GH, *args),
     Command.DOWNLOAD_REMOTE_NAME: lambda *args: download_cmd(

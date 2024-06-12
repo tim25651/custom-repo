@@ -7,7 +7,7 @@ MUST_HAVE_DIRS = {
     "pkgs/apt",
     "pkgs/choco",
     "pkgs/conda",
-    "pkgs/tap",
+    "pkgs/brew",
     "public",
     "public/data",
     "public/data/choco",
@@ -45,7 +45,7 @@ ALLOWED_DIRS = {
     "pkgs/apt",
     "pkgs/choco",
     "pkgs/conda",
-    "pkgs/tap",
+    "pkgs/brew",
 }
 ALLOWED_FILES = {
     "private/README.md",
@@ -78,7 +78,7 @@ ALLOWED_FILES = {
     "configs/*.conda/*.conda",
     "public/tap.git/*",
     "public/data/tap/*",
-    "pkgs/tap/*.rb",
+    "pkgs/brew/*.rb",
     "public/conda/index.html",
     "public/conda/channeldata.json",
     "public/conda/*/index.html",

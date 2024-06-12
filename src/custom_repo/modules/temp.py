@@ -58,9 +58,7 @@ class TemporaryDirectory(tempfile.TemporaryDirectory):
         if bool(os.getenv("TMPDIR_DEBUG")):
             temp_logger.warning("Temporary directory %s not removed.", name)
         else:
-            tempfile.TemporaryDirectory._cleanup(  # type: ignore[attr-defined] # pylint: disable=protected-access
-                name, warn_message, ignore_errors
-            )
+            super()._cleanup(name, warn_message, ignore_errors)  # type: ignore[misc]
 
     @override
     def cleanup(self) -> None:
