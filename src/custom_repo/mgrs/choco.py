@@ -76,9 +76,8 @@ def _pack_choco_pkg(
         file.rename(choco_pkgs / filename)
 
 
-def build_choco_pkg(params: Params, args: list[str], wd: Path) -> bool:
+def build_choco_pkg(params: Params, wd: Path) -> None:
     """Build a Chocolatey package."""
-    del args  # build_choco_pkg has no arguments, might have in the future
 
     pkg = params["PKG"]
     if not pkg:  # pylint: disable=consider-using-assignment-expr
@@ -86,36 +85,26 @@ def build_choco_pkg(params: Params, args: list[str], wd: Path) -> bool:
 
     repo = params["REPO"]
     name = params["NAME"]
-    stem = params["STEM"]
-    version = params["VERSION"]
     domain = params["DOMAIN"]
     choco_pkgs = repo / "pkgs" / "choco"
 
-    target_path = choco_pkgs / f"{name}.{version}.nupkg"
-    if target_path.exists():
-        choco_logger.warning("%s already exists.", target_path)
-        return False
+    try:
+        choco_file = file_manup.get_first_elem(wd)
+    except FileNotFoundError:
+        choco_file = None
 
-    files = list(wd.iterdir())
-    if not files:  # pylint: disable=consider-using-assignment-expr
-        choco_file = False
-    elif len(files) > 1:
-        raise ValueError("More than one file in the package folder.")
-    else:
-        file = files.pop()
-        rel_path = f"data/choco/{stem}|{file.name}"
+    if choco_file:
+        rel_path = f"data/choco/{params['STEM']}|{choco_file.name}"
         params["VARS"]["CHOCO_FILE"] = f"{domain}/{urllib.parse.quote(str(rel_path))}"
         data_target = repo / "public" / rel_path
 
         if data_target.exists():
             raise FileExistsError(f"{data_target} already exists.")
 
-        if file.is_symlink():
-            data_target.symlink_to(file.resolve())
+        if choco_file.is_symlink():
+            data_target.symlink_to(choco_file.resolve())
         else:
-            file_manup.copy(file, data_target)
-
-        choco_file = True
+            file_manup.copy(choco_file, data_target)
 
     content = (pkg / f"{name}.nuspec").read_text("utf-8")
     content = fix_vars(params, content)
@@ -134,8 +123,6 @@ def build_choco_pkg(params: Params, args: list[str], wd: Path) -> bool:
             file_manup.copy(file, wd / "tools" / file.name)
 
     _pack_choco_pkg(repo, choco_pkgs, name, params["STEM"], wd)
-
-    return True
 
 
 def restart_server(repo: Path) -> None:

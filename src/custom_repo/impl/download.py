@@ -10,38 +10,15 @@ from custom_repo.modules import ConnectionKeeper, TemporaryDirectory
 from custom_repo.modules import download as dl
 from custom_repo.modules import file_manup
 from custom_repo.parser import (
-    DOWNLOAD_CMD,
     Command,
     PackageManager,
     Params,
     TargetDir,
-    cmd_groups,
     fix_vars,
     from_file,
 )
 
-run_logger = logging.getLogger(__name__)
-
-
-def download_cmd(
-    keeper: ConnectionKeeper,
-    params: Params,
-    cmd: DOWNLOAD_CMD,
-    args: list[str],
-    wd: Path,
-) -> None:
-    """Subset of run_cmd for downloading files"""
-    if cmd_groups.download_gh(cmd):
-        from_github(keeper, params, args, wd)
-
-    elif cmd_groups.from_file(cmd):
-        from_file(keeper, params, cmd, args, wd)
-
-    elif cmd_groups.from_src(cmd):
-        from_src(params, cmd, args, wd)
-
-    else:
-        raise ValueError(f"Unknown command: {cmd}")
+dl_logger = logging.getLogger(__name__)
 
 
 def from_github(
@@ -141,12 +118,12 @@ def symlink_from_src(
             raise ValueError(
                 f"{target_file} already exists and points to {actual_src}."
             )
-        run_logger.warning("%s already points to %s.", target_file, full_src)
+        dl_logger.warning("%s already points to %s.", target_file, full_src)
         return False
 
     target_file.symlink_to(full_src)
 
-    run_logger.info("Symlinked %s to %s.", full_src, target_file)
+    dl_logger.info("Symlinked %s to %s.", full_src, target_file)
 
     return True
 
@@ -165,11 +142,11 @@ def copy_from_src(
     params["FILE"] = target_file
 
     if target_file.exists():
-        run_logger.warning("%s already exists.", target_file)
+        dl_logger.warning("%s already exists.", target_file)
         return False
 
     file_manup.copy(full_src, target_file)
 
-    run_logger.info("Copied %s to %s.", full_src, target_file)
+    dl_logger.info("Copied %s to %s.", full_src, target_file)
 
     return True

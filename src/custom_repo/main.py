@@ -61,17 +61,14 @@ def main() -> None:
                 [actual_cmd.name for actual_cmd, _ in cmds],
             )
 
-            running = True
-
             with parser.DirContext(params) as wd:
                 for actual_cmd, cmd_args in cmds:
-                    running = run.run_cmd(
+                    run.run_cmd(
                         keeper,
                         params,
                         actual_cmd,
                         cmd_args,
                         wd,
-                        running=running,
                     )
 
             main_logger.info(

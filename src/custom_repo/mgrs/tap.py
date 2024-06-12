@@ -2,11 +2,9 @@
 
 import logging
 import shutil
-import urllib.parse
 from pathlib import Path
 
 from custom_repo.modules import TemporaryDirectory, file_manup, git
-from custom_repo.parser import Params, fix_vars
 
 tap_logger = logging.getLogger(__name__)
 
@@ -51,34 +49,3 @@ def build_tap(repo: Path) -> None:
             file_manup.copy(file, casks / filename)
 
         git.commit_everything(curr_tmp, pub, message="Pushed.")
-
-
-def write_caskfile(
-    params: Params,
-    args: list[str],
-) -> bool:
-    """Create a Cask file for Homebrew."""
-    # content in {{{ ... }}}
-    repo = params["REPO"]
-    stem = params["STEM"]
-    pub = repo / "public"
-    pkgs = repo / "pkgs" / "tap"
-
-    content = args[0]
-
-    target_file = pkgs / (stem + ".rb")
-
-    content = fix_vars(params, content)
-
-    if "$TAP_FILE" in content:
-        if not isinstance(params["FILE"], Path):
-            raise ValueError(f"No FILE set for {params['NAME']}.")
-
-        rel_path = params["FILE"].relative_to(pub)
-        escaped_rel_path = urllib.parse.quote(str(rel_path))
-        content = content.replace("$TAP_FILE", f"{params['DOMAIN']}/{escaped_rel_path}")
-
-    target_file.write_text(content, "utf-8")
-    tap_logger.info("Wrote Cask file: %s", target_file)
-
-    return True

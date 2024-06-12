@@ -20,6 +20,14 @@ class FileManupilationError(Exception):
     """File manipulation failed."""
 
 
+class NoFilesError(FileNotFoundError, FileManupilationError):
+    """No files found."""
+
+
+class MultipleFilesError(FileManupilationError):
+    """Multiple files found."""
+
+
 class DecompressionError(FileManupilationError):
     """Decompression failed."""
 
@@ -94,3 +102,25 @@ def copy(
     shutil.copy(src, target)
 
     file_logger.debug("Copied %s to %s.", src, target)
+
+
+def get_first_elem(path: Path, glob: str | None = None) -> Path:
+    """Get the first element in the directory.
+
+    Args:
+        path (Path): The directory path.
+        glob (str, optional): The glob pattern. Defaults to None.
+
+    Raises:
+        NoFilesError: If no elements are found in the directory.
+        MultipleFilesError: If multiple elements are found in the directory.
+    """
+    gen = path.glob(glob) if glob else path.iterdir()
+    files = list(gen)
+    if not files:  # pylint: disable=consider-using-assignment-expr
+        raise NoFilesError("No elements found in the directory.")
+
+    if len(files) > 1:
+        raise MultipleFilesError("Multiple elements found in the directory.")
+
+    return files[0]

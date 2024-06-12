@@ -102,7 +102,7 @@ def build_repo(repo: Path, priv_file: Path) -> None:
     gpg.sign_repo(pub, pub / "pub.gpg", priv_file, repo)
 
 
-def create_deb(params: Params, args: list[str], wd: Path) -> bool:
+def create_deb(params: Params, args: list[str], wd: Path) -> None:
     """Create a .deb folder structure with `args` as dependencies.
 
     Usage: CREATE_DEB "DEPENDENCY1 DEPENDENCY2" ...
@@ -119,30 +119,21 @@ def create_deb(params: Params, args: list[str], wd: Path) -> bool:
         (dest_dir / "debian" / "control").write_text(control, "utf-8")
     # else: no dependencies
 
-    return True
 
-
-def build_deb(params: Params, args: list[str], wd: Path) -> bool:
+def build_deb(params: Params, wd: Path) -> None:
     """Build a .deb file from the .deb folder structure.
 
     Usage: BUILD_DEB
     """
-    del args  # build_deb has no arguments, might have in the future
-
     dest_dir = wd / f"{params['NAME']}-{params['VERSION']}"
     exec_cmd(["dpkg-buildpackage", "-rfakeroot", "-us", "-uc"], cwd=dest_dir)
 
     target_dir = params["REPO"] / "pkgs" / "apt"
 
-    deb_files = list(wd.glob("*.deb"))
-    if not deb_files:  # pylint: disable=consider-using-assignment-expr
-        raise FileNotFoundError("No .deb files found.")
-    if len(deb_files) > 1:
-        raise ValueError("Multiple .deb files found.")
-    file = deb_files[0]
+    file = file_manup.get_first_elem(dest_dir, "*.deb")
+
     filename = f"{params['STEM']}.deb"
     file_manup.copy(file, target_dir / filename)
-    return True
 
 
 def get_packages_hashes(
@@ -257,7 +248,7 @@ def create_repo(pub: Path) -> None:
     release_file.write_text(release, "utf-8")
 
 
-def dh_disable(params: Params, args: list[str], wd: Path) -> bool:
+def dh_disable(params: Params, args: list[str], wd: Path) -> None:
     """Disable the dh_auto_* commands in the rules file.
 
     Usage: DH_DISABLE
@@ -269,4 +260,3 @@ def dh_disable(params: Params, args: list[str], wd: Path) -> bool:
     rules = rules_file.read_text("utf-8")
     rules += f"\noverride_{arg}:\n\t# do nothing\n"
     rules_file.write_text(rules, "utf-8")
-    return True

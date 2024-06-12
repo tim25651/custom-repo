@@ -122,10 +122,8 @@ def _build(recipe: Path, domain: str) -> tuple[str, str, int]:
     return out, err, code
 
 
-def build_conda_pkg(params: Params, args: list[str], wd: Path) -> bool:
+def build_conda_pkg(params: Params, wd: Path) -> None:
     """Build a conda package."""
-    del args  # build_conda_pkg has no arguments, might have in the future
-
     repo = params["REPO"]
     domain = params["DOMAIN"]
     name = params["NAME"]
@@ -149,5 +147,3 @@ def build_conda_pkg(params: Params, args: list[str], wd: Path) -> bool:
     exec_cmd(["conda-build", "purge"])
 
     _move_pkg(name, stem, version, pkgs_conda)
-
-    return True
