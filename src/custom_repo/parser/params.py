@@ -11,12 +11,12 @@ class TargetDir(Enum):
     Attributes:
         TMP: The temporary directory.
         DEBS: The $REPO/debs/pool/main directory.
-        TAP: The $REPO/debs/tap-data directory.
+        TAP: The $REPO/debs/brew-data directory.
     """
 
     TMP = "tmp"
     DEBS = "debs"
-    TAP = "tap"
+    BREW = "brew"
 
 
 class PackageManager(Enum):

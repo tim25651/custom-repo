@@ -129,3 +129,16 @@ def get_first_elem(path: Path, glob: str | None = None) -> Path:
         raise MultipleFilesError("Multiple elements found in the directory.")
 
     return files[0]
+
+
+def remove(path: Path) -> None:
+    """Remove a file or directory.
+
+    Usage: REMOVE <path>
+    """
+    if path.is_dir():
+        shutil.rmtree(path)
+    elif path.is_file():
+        path.unlink()
+    else:
+        raise NoFilesError(f"File not found: {path}")

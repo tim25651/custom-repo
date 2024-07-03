@@ -26,7 +26,7 @@ class DirContext:
     """Context manager for the repository directory.
 
     If params["DIR"] is "tmp", a temporary directory is created.
-    else either the debs or tap-data directory is returned.
+    else either the debs or brew-data directory is returned.
     """
 
     def __init__(self, params: Params):
@@ -44,7 +44,7 @@ class DirContext:
         if self.dir == TargetDir.DEBS:
             return self.repo / "pkgs" / "apt"
 
-        if self.dir == TargetDir.TAP:
+        if self.dir == TargetDir.BREW:
             return self.repo / "public" / "data" / "brew"
 
         raise ValueError(f"Invalid directory: {self.dir}")

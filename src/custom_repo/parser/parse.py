@@ -170,8 +170,14 @@ def get_version_from_download(
 
     url = dl_args[0]
     filename = get_name(dl_cmd, url, keeper)
+
     if filename == "FAILED_DOWNLOAD":  # pylint: disable=consider-using-assignment-expr
-        raise ParsingError("Failed to download the file.")
+        filename = get_name(dl_cmd, url, keeper)
+
+        if (  # pylint: disable=consider-using-assignment-expr
+            filename == "FAILED_DOWNLOAD"
+        ):
+            raise ParsingError("Failed to download the file.")
 
     version = adjust_regex_version(orig_version, filename)
     suffixes = Path(filename).suffixes
@@ -314,7 +320,9 @@ def filter_cmds(  # pylint: disable=too-complex
         if key in {"VARS", "DEST", "TAP_FILE", "CHOCO_FILE", "AUTHORIZATION"}:
             raise ParsingError(f"Cannot set {key} directly.")
 
-    target_dir = TargetDir.TMP if sandbox else TargetDir.TAP if cask else TargetDir.DEBS
+    target_dir = (
+        TargetDir.TMP if sandbox else TargetDir.BREW if cask else TargetDir.DEBS
+    )
 
     # Check if MKDIR command is used together with SANDBOX
     if target_dir != TargetDir.TMP:
@@ -349,18 +357,18 @@ def parse_choco_pkg(name: str, pkg: Path) -> None:
 def parse_apt_pkg(name: str, pkg: Path) -> None:
     """Check if the folder structure is correct."""
     allowed_dirs: set[str] = set()
-    must_have_files = {f"{name}.rep"}
+    must_have_files = {f"{name}.apt"}
     allowed_files = {"*"}
 
     try:
         has_correct_struct(pkg, allowed_dirs, allowed_files, tuple(), must_have_files)
     except FolderStructureError as e:
         raise FolderStructureError(
-            f"Invalid folder structure in a .rep folder: {e}"
+            f"Invalid folder structure in a .apt folder: {e}"
         ) from e
 
-    if any(x.suffix == ".rep" for x in pkg.iterdir() if x.stem != name):
-        raise StructureError("Only one .rep file allowed.")
+    if any(x.suffix == ".apt" for x in pkg.iterdir() if x.stem != name):
+        raise StructureError("Only one .apt file allowed.")
 
     # must have commands:
     # SANDBOX ANY_DOWNLOAD_CMD CREATE_DEB BUILD_DEB EXIT
@@ -369,7 +377,7 @@ def parse_apt_pkg(name: str, pkg: Path) -> None:
 def parse_apt_file(  # pylint: disable=too-complex
     params: Params, cmds: list[tuple[Command, list[str]]]
 ) -> list[tuple[Command, list[str]]]:
-    """Parse a .rep file and return a list of commands."""
+    """Parse a .apt file and return a list of commands."""
     pkg = params["PKG"]
 
     actual_cmds = [x[0] for x in cmds]
@@ -489,16 +497,16 @@ def parse_conda_file(
     return new_cmds
 
 
-def parse_tap_file(
+def parse_brew_file(
     params: Params, cmds: list[tuple[Command, list[str]]]
 ) -> list[tuple[Command, list[str]]]:
-    """Parse a .tap file and return a list of commands."""
+    """Parse a .brew file and return a list of commands."""
     if params["PKG"]:
         raise StructureError("Not allowed in a package folder.")
 
     actual_cmds = [x[0] for x in cmds]
 
-    allowed = set(DOWNLOAD_CMDS) | {Command.CASK}
+    allowed = set(DOWNLOAD_CMDS) | {Command.CASK, Command.SET}
 
     if used := set(actual_cmds) - allowed:
         raise ParsingError(f"Not allowed commands in a tap folder: {used}")
@@ -518,7 +526,7 @@ def parse_tap_file(
 
 
 def parse_pkg(tool: Path) -> tuple[str, Path, Path]:
-    """Parse a .tap file and return a list of commands."""
+    """Parse a .brew file and return a list of commands."""
     name = tool.stem
     pkg = tool
     fn = tool / tool.name
@@ -526,7 +534,7 @@ def parse_pkg(tool: Path) -> tuple[str, Path, Path]:
     if tool.suffix == ".conda":
         parse_conda_pkg(tool.stem, tool)
 
-    elif tool.suffix == ".rep":
+    elif tool.suffix == ".apt":
         parse_apt_pkg(tool.stem, tool)
 
     elif tool.suffix == ".choco":
@@ -550,11 +558,11 @@ def parse_tool_structure(tool: Path) -> tuple[str, Path | None, Path, PackageMan
 
     if fn.suffix == ".choco":
         pkg_mgr = PackageManager.CHOCO
-    elif fn.suffix == ".rep":
+    elif fn.suffix == ".apt":
         pkg_mgr = PackageManager.APT
     elif fn.suffix == ".conda":
         pkg_mgr = PackageManager.CONDA
-    elif fn.suffix == ".tap":
+    elif fn.suffix == ".brew":
         pkg_mgr = PackageManager.BREW
     else:
         raise CustomRepoError(f"Unknown file type: {fn.suffix}")
@@ -565,7 +573,7 @@ def parse_tool_structure(tool: Path) -> tuple[str, Path | None, Path, PackageMan
 def parse_tool(
     tool: Path, domain: str, authorization: str, keeper: ConnectionKeeper
 ) -> tuple[Params, list[tuple[Command, list[str]]]]:
-    """Parse a .rep file and return a list of commands."""
+    """Parse a .apt file and return a list of commands."""
     repo = tool.parent.parent
 
     name, pkg, fn, pkg_mgr = parse_tool_structure(tool)
@@ -602,7 +610,7 @@ def parse_tool(
         cmds = parse_apt_file(params, cmds)
 
     elif pkg_mgr == PackageManager.BREW:
-        cmds = parse_tap_file(params, cmds)
+        cmds = parse_brew_file(params, cmds)
 
     else:
         raise CustomRepoError(f"Unknown package manager: {pkg_mgr}")
@@ -615,11 +623,12 @@ def parse_choco_file(
 ) -> list[tuple[Command, list[str]]]:
     """Parse a .choco file and return a list of commands."""
     actual_cmds = [x[0] for x in cmds]
+    n_set_cmds = sum(1 for x in actual_cmds if x == Command.SET)
 
     if not params["VERSION"]:
         raise ParsingError("No VERSION command found.")
 
-    if len(actual_cmds) not in {1, 2}:
+    if len(actual_cmds) not in {1 + n_set_cmds, 2 + n_set_cmds}:
         raise ParsingError(
             "Invalid number of commands in a .choco file (DOWNLOAD_CMD)."
         )

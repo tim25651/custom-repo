@@ -194,7 +194,7 @@ def from_file(  # pylint: disable=too-complex
     # open the URL in the browser and download the file
     elif cmd == Command.DOWNLOAD_BROWSER:
         if params["DIR"] in {
-            TargetDir.TAP,
+            TargetDir.BREW,
         }:
             stem = None
             prefix = params["STEM"] + "|"

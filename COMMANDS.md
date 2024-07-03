@@ -190,7 +190,7 @@ Install-ChocolateyPackage @packageArgs @options
 
 ### Homebrew Cask (macOS only)
 - See https://docs.brew.sh/Cask-Cookbook for more information
-- Create a `%name%.tap` file:
+- Create a `%name%.brew` file:
 ```sh
 VERSION %see VERSION section%
 # download is optional (only if the file is not publicly available)
@@ -212,13 +212,13 @@ CASK
   end
 ```
 ### Debian packages from scratch
-- Create a `%name%.rep` directory including a
+- Create a `%name%.apt` directory including a
     - `install` file
     - optional `include-binaries` and `links` files
     - optional `postinst` and `postrm` files and a
-    - `%name%.rep` file
+    - `%name%.apt` file
 - See https://www.debian.org/doc/manuals/maint-guide/dreq.en.html for more information
-- Content of the `%name%.rep` file:
+- Content of the `%name%.apt` file:
 ```sh
 VERSION %see VERSION section%
 SANDBOX
@@ -242,14 +242,14 @@ MKDIR | RENAME | ...
 BUILD_DEB
 ```
 ### Debian packages from Website
-- Create a `%name%.rep` file:
+- Create a `%name%.apt` file:
 ```sh
 VERSION %see VERSION section%
 DOWNLOAD %see DOWNLOAD section%
 ```
 
 ### Debian packages from GitHub
-- Create a `%name%.rep` file:
+- Create a `%name%.apt` file:
 ```sh
 DOWNLOAD_GH %user%/%repo% %pattern% [%tag]
 ```
@@ -285,8 +285,8 @@ CONDA
 ## Variables
 | Variable | Description |
 | --- | --- |
-| `$NAME` | The name of the package (`$NAME`.rep/`$NAME`.pkg/`$NAME`.tap) |
-| `$DIR` | Either `tap` if .tap file, `tmp` if `SANDBOX` is used or `debs` if not |
+| `$NAME` | The name of the package (`$NAME`.apt/`$NAME`.pkg/`$NAME`.brew) |
+| `$DIR` | Either `brew` if .brew file, `tmp` if `SANDBOX` is used or `debs` if not |
 | `$REPO` | The provided repository directory |
 | `$DOMAIN` | The provided domain |
 | `$VERSION` | The version of the package |

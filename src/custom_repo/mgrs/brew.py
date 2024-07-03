@@ -6,7 +6,7 @@ from pathlib import Path
 
 from custom_repo.modules import TemporaryDirectory, file_manup, git
 
-tap_logger = logging.getLogger(__name__)
+brew_logger = logging.getLogger(__name__)
 
 
 def build_tap(repo: Path) -> None:
@@ -39,7 +39,7 @@ def build_tap(repo: Path) -> None:
         files = list(pkgs.iterdir()) if pkgs.exists() else []
 
         if not files:  # pylint: disable=consider-using-assignment-expr
-            tap_logger.warning("No Cask files found in %s.", pkgs)
+            brew_logger.warning("No Cask files found in %s.", pkgs)
             (casks / ".empty").write_text("No Cask files found.", "utf-8")
 
         for file in files:

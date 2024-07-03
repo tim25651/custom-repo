@@ -219,3 +219,16 @@ def download_cmd(
 
     if params["FILE"] == "FAILED_DOWNLOAD":
         raise CommandExecutionError("Download failed.")
+
+
+def remove_cmd(
+    params: Params,
+    args: list[str],
+    wd: Path,
+) -> None:
+    """Remove a file or directory.
+
+    Usage: REMOVE <path>
+    """
+    arg = fix_vars(params, args[0])
+    file_manup.remove(wd / arg)

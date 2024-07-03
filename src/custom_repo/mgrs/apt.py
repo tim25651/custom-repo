@@ -125,7 +125,9 @@ def build_deb(params: Params, wd: Path) -> None:
 
     Usage: BUILD_DEB
     """
-    dest_dir = wd / f"{params['NAME']}-{params['VERSION']}"
+    dest = f"{params['NAME']}-{params['VERSION']}"
+    dest_dir = wd / dest
+
     exec_cmd(["dpkg-buildpackage", "-rfakeroot", "-us", "-uc"], cwd=dest_dir)
 
     target_dir = params["REPO"] / "pkgs" / "apt"
@@ -251,7 +253,7 @@ def create_repo(pub: Path) -> None:
 def dh_disable(params: Params, args: list[str], wd: Path) -> None:
     """Disable the dh_auto_* commands in the rules file.
 
-    Usage: DH_DISABLE
+    Usage: DH_DISABLE CMD
     """
     arg = args[0]
 
@@ -260,3 +262,27 @@ def dh_disable(params: Params, args: list[str], wd: Path) -> None:
     rules = rules_file.read_text("utf-8")
     rules += f"\noverride_{arg}:\n\t# do nothing\n"
     rules_file.write_text(rules, "utf-8")
+
+
+def include_binaries(params: Params, wd: Path) -> None:
+    """Include the binaries in the .deb package.
+
+    Usage: INCLUDE_BINARIES
+    """
+    # python equivalent of the shell command:
+    # grep -rIL .
+    dest = f"{params['NAME']}-{params['VERSION']}"
+    content = exec_cmd(["grep", "-rIL", "."], cwd=wd / dest)
+    lines = sorted(line.strip() for line in content.splitlines() if line.strip())
+    if lines:
+        incl_bins_path = wd / dest / "debian" / "source" / "include-binaries"
+        incl_bins_path.write_text("\n".join(lines) + "\n", "utf-8")
+
+
+def set_native(params: Params, wd: Path) -> None:
+    """Set the source format to 3.0 (native).
+
+    Usage: SET_NATIVE
+    """
+    dest = f"{params['NAME']}-{params['VERSION']}"
+    (wd / dest / "debian" / "source" / "format").write_text("3.0 (native)\n", "utf-8")

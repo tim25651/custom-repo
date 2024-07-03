@@ -35,7 +35,10 @@ class Command(Enum):
     CONDA_BUILD = "CONDA_BUILD"
     MKDIR = "MKDIR"
     DH_DISABLE = "DH_DISABLE"
+    INCLUDE_BINARIES = "INCLUDE_BINARIES"
     DOWNLOAD_REMOTE_NAME = "DOWNLOAD_REMOTE_NAME"
+    SET_NATIVE = "SET_NATIVE"
+    REMOVE = "REMOVE"
 
 
 NUMBER_OF_ARGS: dict[Command, int | tuple[int, ...]] = {
@@ -62,6 +65,9 @@ NUMBER_OF_ARGS: dict[Command, int | tuple[int, ...]] = {
     Command.CONDA: 0,
     Command.CONDA_BUILD: 0,
     Command.DH_DISABLE: 1,
+    Command.INCLUDE_BINARIES: 0,
+    Command.SET_NATIVE: 0,
+    Command.REMOVE: 1,
 }
 
 
