@@ -42,7 +42,8 @@ def commit_everything(
 ) -> None:
     """Add all files, commit and push."""
     exec_cmd(["git", "add", "."], cwd=repo)
-    exec_cmd(["git", "commit", "-m", message], cwd=repo, raise_on_failure=False)
+    exec_cmd(["git", "commit", "-m", message], cwd=repo, raise_on_failure=True)
     exec_cmd(["git", "push"], cwd=repo)
+
     if bare_repo:
         update_server_info(bare_repo)
